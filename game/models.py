@@ -27,13 +27,8 @@ class GameSessionMoves(models.Model):
         validators=[MaxValueValidator(8), MinValueValidator(0)]
     )
 
-    @property
-    def game_has_winner(self):
-        return self.winner is not None
-
-    @property
-    def game_is_over(self):
-        return self.game_over
+    class Meta:
+        unique_together = ["game", "position"]
 
     def __str__(self):
-        return str(self.move)
+        return f"{self.game}: {self.player} - {self.position}"
