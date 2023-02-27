@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from game.models import Game, GameSessionMoves
+
+admin.site.register(Game)
+admin.site.register(GameSessionMoves)
+
