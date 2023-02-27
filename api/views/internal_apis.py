@@ -21,10 +21,16 @@ from api.serializers.game_serializers.serializers import (
     GameSerializer,
     GameDetailsSerializer,
     GameSessionMovesSerializer,
+    GameWithGameMovesSerializer,
 )
 
 
 class StartGame(APIView):
+    """
+    This view starts a new game session and returns the uuid of the game.
+    url: /api/start/
+    """
+
     def get(self, request):
         game = Game.objects.create()
         serializer = GameSerializer(game)
@@ -32,17 +38,56 @@ class StartGame(APIView):
 
 
 class GameList(ListAPIView):
+    """
+    This method retrives all the started game session uuid
+    url: /api/games/
+    """
+
     serializer_class = GameDetailsSerializer
     queryset = Game.objects.all()
 
 
 class GameDetails(RetrieveAPIView):
+    """
+    This method retrives a detail for a single game session with uuid
+    url: /api/games/<uuid:uuid>/
+    """
+
     serializer_class = GameDetailsSerializer
     queryset = Game.objects.all()
     lookup_field = "uuid"
 
 
+class GameCheck(APIView):
+    """
+    This method checks if the game is in progress or finished
+    url: /api/check/<uuid:uuid>/
+    """
+
+    def get(self, request, uuid):
+        queryset = Game.objects.filter(uuid=uuid).first()
+        if queryset.game_over:
+            return Response({"game": "finished", "winner": queryset.winner})
+        return Response({"game": "in progress"})
+
+
+class GameHistory(ListAPIView):
+    """
+    This method retrives all the game sessions with their moves
+    url: /api/history/
+    """
+
+    serializer_class = GameWithGameMovesSerializer
+    queryset = Game.objects.all()
+
+
 class GameMove(APIView):
+    """
+    This method is responsible for making a move in the game session,
+    checking winner and raising an error if the game is finished when putting a move
+    url: /api/move/<uuid:uuid>/
+    """
+
     winner_combinations = [
         [0, 1, 2],
         [3, 4, 5],
@@ -97,8 +142,6 @@ class GameMove(APIView):
 
     # Methods
     def get(self, request, uuid):
-        self.perform_game_over_check()
-
         queryset = self.get_queryset()
         serializer = self.get_serializer(instance=queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

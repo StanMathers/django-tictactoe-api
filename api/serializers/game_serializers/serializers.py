@@ -18,3 +18,12 @@ class GameSessionMovesSerializer(serializers.ModelSerializer):
     class Meta:
         model = GameSessionMoves
         fields = ["player", "position"]
+
+
+class GameWithGameMovesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Game
+        fields = ["uuid", "moves"]
+
+    moves = GameSessionMovesSerializer(many=True, read_only=True, source="gamesessionmoves_set")
