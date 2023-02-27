@@ -78,7 +78,7 @@ class GameHistory(ListAPIView):
     """
 
     serializer_class = GameWithGameMovesSerializer
-    queryset = Game.objects.all()
+    queryset = Game.objects.prefetch_related("gamesessionmoves_set").all()
 
 
 class GameMove(APIView):
